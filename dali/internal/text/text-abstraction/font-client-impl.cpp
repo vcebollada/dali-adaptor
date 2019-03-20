@@ -20,12 +20,16 @@
 
 // EXTERNAL INCLUDES
 #ifndef DALI_PROFILE_UBUNTU
+#ifndef ANDROID
 #include <vconf.h>
+#endif
 #endif
 
 // INTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/singleton-service.h>
 #include <dali/internal/text/text-abstraction/font-client-plugin-impl.h>
+
+#include <dali/devel-api/text-abstraction/glyph-info.h>
 
 namespace Dali
 {
@@ -105,7 +109,9 @@ int FontClient::GetDefaultFontSize()
   int fontSize( -1 );
 
 #ifndef DALI_PROFILE_UBUNTU
+#ifndef ANDROID
   vconf_get_int( VCONFKEY_SETAPPL_ACCESSIBILITY_FONT_SIZE, &fontSize );
+#endif
 #endif // DALI_PROFILE_UBUNTU
 
   return fontSize;
@@ -219,7 +225,6 @@ bool FontClient::HasItalicStyle( FontId fontId ) const
   {
     return false;
   }
-
   return mPlugin->HasItalicStyle( fontId );
 }
 
@@ -293,6 +298,7 @@ void FontClient::CreateVectorBlob( FontId fontId, GlyphIndex glyphIndex, VectorB
   mPlugin->CreateVectorBlob( fontId, glyphIndex, blob, blobLength, nominalWidth, nominalHeight );
 }
 
+GlyphInfo glyphInfo;
 const GlyphInfo& FontClient::GetEllipsisGlyph( PointSize26Dot6 requestedPointSize )
 {
   CreatePlugin();

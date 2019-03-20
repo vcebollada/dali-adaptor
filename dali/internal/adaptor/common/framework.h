@@ -32,6 +32,9 @@
 namespace Dali
 {
 
+class TouchPoint;
+class KeyEvent;
+
 namespace Internal
 {
 
@@ -131,6 +134,16 @@ public:
     * Invoked when the memory level of the device is low.
     */
     virtual void OnMemoryLow( Dali::DeviceStatus::Memory::Status status ) {}
+
+#ifdef ANDROID
+    virtual void OnSurfaceCreated( Any newSurface ) {};
+
+    virtual void OnSurfaceDestroyed( Any oldSurface ) {};
+
+    virtual void OnTouchEvent( Dali::TouchPoint& touchPoint, int timeStamp ) {}
+
+    virtual void OnKeyEvent( Dali::KeyEvent& keyEvent ) {}
+#endif
   };
 
 public:
@@ -195,6 +208,15 @@ public:
    */
   static std::string GetDataPath();
 
+  // TODO For demo for simplicity I made a  static function to avoid changing different API levels.
+  static void* GetApplicationContext();
+
+  // TODO For demo for simplicity I made a  static function to avoid changing different API levels.
+  static void SetApplicationContext(void* data);
+
+  // TODO For demo for simplicity I made a  static function to avoid changing different API levels.
+  static Framework* GetApplicationFramework();
+
   /**
    * Sets system language.
    */
@@ -214,6 +236,9 @@ public:
    * Gets system region.
    */
   std::string GetRegion() const;
+
+  unsigned int AddIdle( int timeout, void* data, bool ( *callback )( void *data ) );
+  void RemoveIdle( unsigned int id );
 
 private:
 
@@ -258,6 +283,7 @@ private:
 private:
   Observer&          mObserver;
   bool               mInitialised;
+  bool               mResume;
   bool               mRunning;
   int*               mArgc;
   char***            mArgv;

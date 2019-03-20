@@ -821,7 +821,6 @@ bool LoadBitmapFromJpeg( const Dali::ImageLoader::Input& input, Dali::Devel::Pix
 bool EncodeToJpeg( const unsigned char* const pixelBuffer, Vector< unsigned char >& encodedPixels,
                    const std::size_t width, const std::size_t height, const Pixel::Format pixelFormat, unsigned quality )
 {
-
   if( !pixelBuffer )
   {
     DALI_LOG_ERROR("Null input buffer\n");
@@ -903,7 +902,6 @@ bool EncodeToJpeg( const unsigned char* const pixelBuffer, Vector< unsigned char
   }
   return true;
 }
-
 
 JpegTransform ConvertExifOrientation(ExifData* exifData)
 {
@@ -1164,7 +1162,6 @@ bool LoadJpegHeader( const Dali::ImageLoader::Input& input, unsigned int& width,
   }
   return success;
 }
-
 
 } // namespace TizenPlatform
 

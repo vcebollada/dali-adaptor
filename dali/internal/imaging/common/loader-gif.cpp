@@ -16,9 +16,7 @@
  */
 
 #include <dali/internal/imaging/common/loader-gif.h>
-
 #include <gif_lib.h>
-
 #include <dali/integration-api/debug.h>
 #include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <memory>
@@ -276,7 +274,6 @@ bool LoadGifHeader( const Dali::ImageLoader::Input& input, unsigned int& width, 
   GifFileType* gifInfo = NULL;
   AutoCleanupGif autoCleanupGif(gifInfo);
   FILE* const fp = input.file;
-
   return LoadGifHeader(fp, width, height, &gifInfo);
 }
 

@@ -18,10 +18,8 @@
 #include <dali/internal/imaging/common/loader-png.h>
 
 #include <cstring>
-
 #include <zlib.h>
 #include <png.h>
-
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/images/image.h>
 #include <dali/internal/legacy/tizen/platform-capabilities.h>

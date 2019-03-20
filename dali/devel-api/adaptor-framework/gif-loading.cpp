@@ -1286,11 +1286,13 @@ bool GifLoading::LoadAllFrames( std::vector<Dali::PixelData> &pixelData, Dali::V
   {
     return LoadNextNFrames( 0, mImpl->loaderInfo.animated.frameCount, pixelData );
   }
+
   return false;
 }
 
 ImageDimensions GifLoading::GetImageSize()
 {
+
   return ImageDimensions( mImpl->imageProperties.w, mImpl->imageProperties.h );
 }
 
