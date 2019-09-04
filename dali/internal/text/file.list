@@ -18,5 +18,6 @@ adaptor_text_android_src_files=\
     ${adaptor_text_dir}/text-abstraction/font-client-impl.cpp \
     ${adaptor_text_dir}/text-abstraction/font-client-plugin-impl.cpp \
     ${adaptor_text_dir}/text-abstraction/segmentation-impl.cpp \
-    ${adaptor_text_dir}/text-abstraction/shaping-impl.cpp
+    ${adaptor_text_dir}/text-abstraction/shaping-impl.cpp \
+    ${adaptor_text_dir}/text-abstraction/text-renderer-impl.cpp
 

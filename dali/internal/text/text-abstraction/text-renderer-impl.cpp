@@ -66,7 +66,11 @@ TextAbstraction::TextRenderer TextRenderer::Get()
 
 Devel::PixelBuffer TextRenderer::Render(const TextAbstraction::TextRenderer::Parameters& parameters)
 {
+#ifdef ANDROID
+  return Devel::PixelBuffer();
+#else
   return RenderTextCairo(parameters);
+#endif
 }
 
 } // namespace Internal
