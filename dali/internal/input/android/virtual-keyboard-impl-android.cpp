@@ -18,16 +18,6 @@
 // CLASS HEADER
 #include <dali/internal/input/common/virtual-keyboard-impl.h>
 
-// EXTERNAL INCLUDES
-#include <algorithm>
-
-#include <dali/integration-api/debug.h>
-
-// INTERNAL INCLUDES
-#include <dali/integration-api/adaptor.h>
-#include <dali/internal/system/common/locale-utils.h>
-#include <dali/internal/input/android/input-method-context-impl-android.h>
-
 namespace Dali
 {
 
@@ -40,7 +30,67 @@ namespace Adaptor
 namespace VirtualKeyboard
 {
 
-Dali::InputMethod::ButtonAction::Type gButtonActionFunction = Dali::InputMethod::ButtonAction::DEFAULT;
+void Show()
+{
+
+}
+
+void Hide()
+{
+
+}
+
+bool IsVisible()
+{
+  return false;
+}
+
+void ApplySettings( const Property::Map& settingsMap )
+{
+
+}
+
+void EnablePrediction( const bool enable )
+{
+
+}
+
+bool IsPredictionEnabled()
+{
+  return false;
+}
+
+Rect<int> GetSizeAndPosition()
+{
+  Rect<int> ret;
+  return ret;
+}
+
+Dali::VirtualKeyboard::StatusSignalType& StatusChangedSignal()
+{
+  Dali::VirtualKeyboard::StatusSignalType ret;
+  return ret;
+}
+
+Dali::VirtualKeyboard::KeyboardResizedSignalType& ResizedSignal()
+{
+  Dali::VirtualKeyboard::KeyboardResizedSignalType ret;
+  return ret;
+}
+
+Dali::VirtualKeyboard::LanguageChangedSignalType& LanguageChangedSignal()
+{
+  Dali::VirtualKeyboard::LanguageChangedSignalType ret;
+  return ret;
+}
+
+Dali::VirtualKeyboard::TextDirection GetTextDirection()
+{
+  return Dali::VirtualKeyboard::LeftToRight;
+}
+
+Dali::InputMethod::ActionButton gActionButtonFunction = Dali::InputMethod::ACTION_DEFAULT;
+
 
 void RotateTo(int angle)
 {
@@ -52,7 +102,7 @@ void SetReturnKeyType( const InputMethod::ButtonAction::Type type )
 
 Dali::InputMethod::ButtonAction::Type GetReturnKeyType()
 {
-  return gButtonActionFunction;
+  return Dali::InputMethod::ButtonAction::DEFAULT;
 }
 
 } // namespace VirtualKeyboard
