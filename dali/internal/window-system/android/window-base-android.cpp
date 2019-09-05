@@ -343,6 +343,15 @@ void WindowBaseAndroid::SetTransparency( bool transparent )
 {
 }
 
+void WindowBaseAndroid::SetParent( Any parent )
+{
+}
+
+bool WindowBaseAndroid::IsMatchedWindow( Any window )
+{
+  return false;
+}
+
 } // namespace Adaptor
 
 } // namespace Internal
