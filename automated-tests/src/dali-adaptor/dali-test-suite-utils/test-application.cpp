@@ -28,7 +28,8 @@ TestApplication::TestApplication( uint32_t surfaceWidth,
                                   uint32_t  verticalDpi,
                                   ResourcePolicy::DataRetention policy,
                                   bool initialize )
-: mCore( NULL ),
+: mRenderSurface( NULL ),
+  mCore( NULL ),
   mSurfaceWidth( surfaceWidth ),
   mSurfaceHeight( surfaceHeight ),
   mFrame( 0u ),
@@ -192,7 +193,7 @@ void TestApplication::DoUpdate( uint32_t intervalMilliseconds, const char* locat
 bool TestApplication::Render( uint32_t intervalMilliseconds, const char* location )
 {
   DoUpdate( intervalMilliseconds, location );
-  mCore->Render( mRenderStatus, false );
+  mCore->Render( mRenderStatus, false /*do not force clear*/, false /*do not skip rendering*/ );
 
   mFrame++;
 
@@ -218,7 +219,7 @@ bool TestApplication::GetRenderNeedsUpdate()
 bool TestApplication::RenderOnly( )
 {
   // Update Time values
-  mCore->Render( mRenderStatus, false );
+  mCore->Render( mRenderStatus, false /*do not force clear*/, false /*do not skip rendering*/ );
 
   mFrame++;
 
