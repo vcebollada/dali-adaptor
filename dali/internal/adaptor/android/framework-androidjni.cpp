@@ -229,11 +229,29 @@ void Framework::Run()
 
 unsigned int Framework::AddIdle( int timeout, void* data, bool ( *callback )( void *data ) )
 {
-  return -1;
+  JNIEnv* env = applicationContext.jniEnv;
+  jclass clazz = env->FindClass( "com/sec/daliview/DaliView" );
+  if ( !clazz )
+    return -1;
+
+  jmethodID addIdle = env->GetStaticMethodID( clazz, "addIdle", "(JJJ)I" );
+  if (!addIdle)
+    return -1;
+
+  jint id = env->CallStaticLongMethod( clazz, addIdle, reinterpret_cast<jlong>( callback ), reinterpret_cast<jlong>( data ), static_cast<jlong>( timeout ) );
+  return static_cast<unsigned int>( id );
 }
 
 void Framework::RemoveIdle( unsigned int id )
 {
+  JNIEnv* env = applicationContext.jniEnv;
+  jclass clazz = env->FindClass( "com/sec/daliview/DaliView" );
+  if( !clazz )
+    return;
+
+  jmethodID removeIdle = env->GetStaticMethodID( clazz, "removeIdle", "(I)V" );
+  if( removeIdle )
+    env->CallStaticVoidMethod( clazz, removeIdle, static_cast<jint>( id ) );
 }
 
 void Framework::Quit()

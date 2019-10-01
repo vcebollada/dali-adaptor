@@ -77,7 +77,7 @@ void* GetApplicationWindow()
   return Internal::Adaptor::Application::GetApplicationWindow();
 }
 
-bool AppEventHandler( Application application, int type, void* data )
+bool AppStatusHandler( Application application, int type, void* data )
 {
   return Internal::Adaptor::GetImplementation( application ).AppStatusHandler( type, data );
 }

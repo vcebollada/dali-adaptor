@@ -95,13 +95,13 @@ DALI_ADAPTOR_API void* GetApplicationConfiguration();
 DALI_ADAPTOR_API void* GetApplicationWindow();
 
 /**
- * @brief Handles the application platform events
+ * @brief Handles the application lifecycle events.
  * @param[in] application A handle to the Application
  * @param[in] type A type of event
  * @param[in] data The event data
  * @return true if success, false otherwise
  */
-DALI_ADAPTOR_API bool AppEventHandler( Application application, int type, void* data );
+DALI_ADAPTOR_API bool AppStatusHandler( Application application, int type, void* data );
 
 /**
  * @brief Downcasts a ref object to Application handle
