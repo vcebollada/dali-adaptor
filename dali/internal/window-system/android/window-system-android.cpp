@@ -51,7 +51,7 @@ void GetScreenSize( int& width, int& height )
   ANativeWindow* window = static_cast<ANativeWindow*>( Framework::GetApplicationWindow() );
   width = ANativeWindow_getWidth( window );
   height = ANativeWindow_getHeight( window );
-  DALI_LOG_INFO( "Native window width %d, height %d", width, height );
+  DALI_LOG_WARNING( "Native window width %d, height %d", width, height );
 }
 
 bool SetKeyboardRepeatInfo( float rate, float delay )
