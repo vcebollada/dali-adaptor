@@ -281,6 +281,8 @@ public: // From Framework::Observer
 
   virtual void OnReplaceSurface( Any newSurface );
 
+  virtual void OnDeleteSurface( Any newSurface );
+
   virtual void OnTouchEvent( TouchPoint& touchPoint, int timeStamp );
 
   virtual void OnKeyEvent( KeyEvent& keyEvent );
