@@ -137,6 +137,8 @@ public:
 
     virtual void OnReplaceSurface( Any newSurface ) {}
 
+    virtual void OnDeleteSurface( Any newSurface ) {}
+
     virtual void OnTouchEvent( TouchPoint& touchPoint, int timeStamp ) {}
 
     virtual void OnKeyEvent( KeyEvent& keyEvent ) {}
@@ -326,8 +328,7 @@ private:
 private:
   Observer&          mObserver;
   bool               mInitialised;
-  bool               mResume;
-  bool               mSurfaceCreated;
+  bool               mPaused;
   bool               mRunning;
   int*               mArgc;
   char***            mArgv;
