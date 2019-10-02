@@ -79,42 +79,6 @@ struct ApplicationContext
 
 struct ApplicationContext applicationContext;
 
-// Copied from x server
-static unsigned int GetCurrentMilliSeconds(void)
-{
-  struct timeval tv;
-
-  struct timespec tp;
-  static clockid_t clockid;
-
-  if (!clockid)
-  {
-#ifdef CLOCK_MONOTONIC_COARSE
-    if (clock_getres(CLOCK_MONOTONIC_COARSE, &tp) == 0 &&
-      (tp.tv_nsec / 1000) <= 1000 && clock_gettime(CLOCK_MONOTONIC_COARSE, &tp) == 0)
-    {
-      clockid = CLOCK_MONOTONIC_COARSE;
-    }
-    else
-#endif
-    if (clock_gettime(CLOCK_MONOTONIC, &tp) == 0)
-    {
-      clockid = CLOCK_MONOTONIC;
-    }
-    else
-    {
-      clockid = ~0L;
-    }
-  }
-  if (clockid != ~0L && clock_gettime(clockid, &tp) == 0)
-  {
-    return (tp.tv_sec * 1000) + (tp.tv_nsec / 1000000L);
-  }
-
-  gettimeofday(&tv, NULL);
-  return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-}
-
 } // Unnamed namespace
 
 /**
@@ -122,35 +86,6 @@ static unsigned int GetCurrentMilliSeconds(void)
  */
 struct Framework::Impl
 {
-
-  struct IdleCallback
-  {
-    int timestamp;
-    int timeout;
-    int id;
-    void* data;
-    bool ( *callback )( void *data );
-
-    IdleCallback( int timeout, int id, void* data, bool ( *callback )( void *data ) )
-    : timestamp( GetCurrentMilliSeconds() + timeout ),
-      timeout( timeout ),
-      id ( id ),
-      data( data ),
-      callback( callback )
-    {
-    }
-
-    bool operator()()
-    {
-      return callback( data );
-    }
-
-    bool operator<( const IdleCallback& rhs ) const
-    {
-      return timestamp > rhs.timestamp;
-    }
-  };
-
   // Constructor
 
   Impl(void* data)
@@ -197,8 +132,7 @@ struct Framework::Impl
 Framework::Framework( Framework::Observer& observer, int *argc, char ***argv, Type type )
 : mObserver( observer ),
   mInitialised( false ),
-  mResume( false ),
-  mSurfaceCreated( false ),
+  mPaused( false ),
   mRunning( false ),
   mArgc( argc ),
   mArgv( argv ),
@@ -238,7 +172,7 @@ unsigned int Framework::AddIdle( int timeout, void* data, bool ( *callback )( vo
   if (!addIdle)
     return -1;
 
-  jint id = env->CallStaticLongMethod( clazz, addIdle, reinterpret_cast<jlong>( callback ), reinterpret_cast<jlong>( data ), static_cast<jlong>( timeout ) );
+  jint id = env->CallStaticIntMethod( clazz, addIdle, reinterpret_cast<jlong>( callback ), reinterpret_cast<jlong>( data ), static_cast<jlong>( timeout ) );
   return static_cast<unsigned int>( id );
 }
 
@@ -361,67 +295,40 @@ bool Framework::AppStatusHandler(int type, void* data)
   switch (type)
   {
     case APP_WINDOW_CREATED:
-    {
+      applicationContext.window = static_cast< ANativeWindow* >( data );
       if( !mInitialised )
       {
-        applicationContext.window = static_cast< ANativeWindow* >( data );
         mObserver.OnInit();
         mInitialised = true;
       }
 
       mObserver.OnReplaceSurface( data );
-      mSurfaceCreated = true;
-
-      if( mResume )
-      {
-        mObserver.OnResume();
-        mResume = false;
-      }
       break;
-    }
+
+    case APP_WINDOW_DESTROYED:
+      mObserver.OnReplaceSurface( data );
+      break;
 
     case APP_RESET:
       mObserver.OnReset();
       break;
 
     case APP_RESUME:
-    {
-      if( mSurfaceCreated )
-      {
-        mObserver.OnResume();
-        break;
-      }
-      mResume = true;
+      mObserver.OnResume();
       break;
-    }
-
-    case APP_WINDOW_DESTROYED:
-    {
-      mSurfaceCreated = false;
-      mObserver.OnPause();
-      mResume = true;
-      break;
-    }
 
     case APP_PAUSE:
-    {
-      if( mInitialised )
-      {
-        mObserver.OnPause();
-      }
+      mObserver.OnPause();
       break;
-    }
 
     case APP_LANGUAGE_CHANGE:
       mObserver.OnLanguageChanged();
       break;
 
     case APP_DESTROYED:
-    {
       mObserver.OnTerminate();
       mInitialised = false;
       break;
-    }
 
     default:
       break;
