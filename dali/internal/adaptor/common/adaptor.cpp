@@ -136,6 +136,11 @@ void Adaptor::ReplaceSurface( Dali::Integration::SceneHolder window, Dali::Rende
   mImpl->ReplaceSurface( window, surface );
 }
 
+void Adaptor::DeleteSurface( Dali::RenderSurfaceInterface& surface )
+{
+  mImpl->DeleteSurface( surface );
+}
+
 Adaptor::AdaptorSignalType& Adaptor::ResizedSignal()
 {
   return mImpl->ResizedSignal();

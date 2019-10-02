@@ -296,6 +296,13 @@ public:
   void ReplaceSurface( Dali::Integration::SceneHolder sceneHolder, Dali::RenderSurfaceInterface& surface );
 
   /**
+   * @brief Deletes the rendering surface
+   *
+   * @param[in] surface to delete
+   */
+  void DeleteSurface( Dali::RenderSurfaceInterface& surface );
+
+  /**
    * @brief Get the render surface the adaptor is using to render to.
    *
    * @return reference to current render surface
