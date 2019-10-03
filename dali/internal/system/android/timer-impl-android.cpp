@@ -18,10 +18,15 @@
 // CLASS HEADER
 #include <dali/internal/system/common/timer-impl.h>
 
+// EXTERNAL INCLUDES
+#include <dali/integration-api/android/android-framework.h>
+
 // INTERNAL INCLUDES
 #include <dali/internal/adaptor/common/adaptor-impl.h>
 #include <dali/internal/adaptor/common/framework.h>
+#include <dali/internal/adaptor/android/android-framework-impl.h>
 #include <dali/public-api/dali-adaptor-common.h>
+
 
 namespace Dali
 {
@@ -84,7 +89,7 @@ void Timer::Start()
     Stop();
   }
 
-  mImpl->mId = Framework::GetApplicationFramework()->AddIdle( mImpl->mInterval, this, TimerCallback );
+  mImpl->mId = AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).AddIdle( mImpl->mInterval, this, TimerCallback );
   mImpl->mRunning = true;
 }
 
@@ -95,7 +100,7 @@ void Timer::Stop()
 
   if( mImpl->mId != 0 )
   {
-    Framework::GetApplicationFramework()->RemoveIdle( mImpl->mId );
+    AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).RemoveIdle( mImpl->mId );
   }
 
   ResetTimerData();
@@ -108,7 +113,8 @@ void Timer::Pause()
 
   if( mImpl->mRunning )
   {
-    Framework::GetApplicationFramework()->RemoveIdle( mImpl->mId );
+    // TODO: Add pause
+    AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).RemoveIdle( mImpl->mId );
     mImpl->mId = 0;
   }
 }
@@ -120,7 +126,8 @@ void Timer::Resume()
 
   if( mImpl->mRunning && mImpl->mId == 0 )
   {
-    mImpl->mId = Framework::GetApplicationFramework()->AddIdle( mImpl->mInterval, this, TimerCallback );
+    // TODO: Add resume
+    mImpl->mId = AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).AddIdle( mImpl->mInterval, this, TimerCallback );
   }
 }
 

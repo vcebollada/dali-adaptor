@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2019 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 #include <dali/internal/window-system/android/window-base-android.h>
 
 // INTERNAL HEADERS
-#include <dali/internal/adaptor/common/framework.h>
 #include <dali/internal/window-system/common/window-impl.h>
 #include <dali/internal/window-system/common/window-render-surface.h>
 
@@ -27,10 +26,7 @@
 #include <dali/public-api/object/any.h>
 #include <dali/public-api/events/mouse-button.h>
 #include <dali/integration-api/debug.h>
-
-// Android
-#include <configuration.h>
-#include <native_window.h>
+#include <dali/integration-api/android/android-framework.h>
 
 namespace Dali
 {
@@ -68,7 +64,7 @@ void WindowBaseAndroid::Initialize( PositionSize positionSize, Any surface, bool
   else
   {
     DALI_LOG_INFO( gWindowBaseLogFilter, Debug::General, "Initialising using default Android native window\n" );
-    mWindow = static_cast< ANativeWindow* >( Dali::Internal::Adaptor::Framework::GetApplicationWindow() );
+    mWindow = Dali::Integration::AndroidFramework::Get().GetApplicationWindow();
   }
 
   DALI_ASSERT_ALWAYS( mWindow && "Failed to get Android window" );
@@ -313,7 +309,7 @@ bool WindowBaseAndroid::UngrabKeyList( const Dali::Vector< Dali::KEY >& key, Dal
 
 void WindowBaseAndroid::GetDpi( unsigned int& dpiHorizontal, unsigned int& dpiVertical )
 {
-  AConfiguration* config = static_cast<AConfiguration*>( Framework::GetApplicationConfiguration() );
+  AConfiguration* config = Dali::Integration::AndroidFramework::Get().GetApplicationConfiguration();
 
   int32_t density = AConfiguration_getDensity( config );
   if( density == ACONFIGURATION_DENSITY_ANY )

@@ -21,11 +21,8 @@
 #include <cstdio>
 #include <string>
 #include <fstream>
-
-// Android
-#include <asset_manager.h>
-
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/android/android-framework.h>
 
 // INTERNAL INCLUDES
 #include <dali/internal/system/android/file-wrapper.h>
@@ -66,7 +63,7 @@ int ReadFile(const std::string& filename, std::streampos& fileSize, Dali::Vector
   const int assetsOffset = ( sizeof("assets/") - sizeof( char ) ) / sizeof( char );
   if( !strncmp( path, "assets/", assetsOffset ) )
   {
-    AAssetManager* assetManager = static_cast<AAssetManager*>( Dali::Internal::Adaptor::Framework::GetApplicationAssets() );
+    AAssetManager* assetManager = Dali::Integration::AndroidFramework::Get().GetApplicationAssets();
     AAsset* asset = AAssetManager_open( assetManager, path + assetsOffset, AASSET_MODE_BUFFER );
     if( asset )
     {
@@ -117,7 +114,7 @@ std::streampos GetFileSize(const std::string& filename)
   const int assetsOffset = ( sizeof("assets/") - sizeof( char ) ) / sizeof( char );
   if( !strncmp( path, "assets/", assetsOffset ) )
   {
-    AAssetManager* assetManager = static_cast<AAssetManager*>( Dali::Internal::Adaptor::Framework::GetApplicationAssets() );
+    AAssetManager* assetManager = Dali::Integration::AndroidFramework::Get().GetApplicationAssets();
     AAsset* asset = AAssetManager_open( assetManager, path + assetsOffset, AASSET_MODE_BUFFER );
     if( asset )
     {

@@ -156,41 +156,6 @@ public:
   static std::string GetDataPath();
 
   /**
-   *  Gets the application platform assets.
-   */
-  static void* GetApplicationContext();
-
-  /**
-   *  Sets the application platform context.
-   */
-  static void SetApplicationContext(void* context);
-
-  /**
-   *  Gets the application platform assets.
-   */
-  static void* GetApplicationAssets();
-
-  /**
-   *  Sets the application platform assets.
-   */
-  static void SetApplicationAssets(void* assets);
-
-  /**
-   *  Gets the application platform configuration.
-   */
-  static void* GetApplicationConfiguration();
-
-  /**
-   *  Gets the application platform configuration.
-   */
-  static void SetApplicationConfiguration(void* configuration);
-
-  /**
-   *  Gets the application platform window.
-   */
-  static void* GetApplicationWindow();
-
-  /**
    * Retrieves the pre-initialized application.
    *
    * @return A pointer to the pre-initialized application
@@ -279,13 +244,15 @@ public: // From Framework::Observer
   */
   virtual void OnMemoryLow( Dali::DeviceStatus::Memory::Status status );
 
-  virtual void OnReplaceSurface( Any newSurface );
+  /**
+   * Called when the framework informs the application that the platform surface is created.
+   */
+  virtual void OnSurfaceCreated( Any newSurface );
 
-  virtual void OnDeleteSurface( Any newSurface );
-
-  virtual void OnTouchEvent( TouchPoint& touchPoint, int timeStamp );
-
-  virtual void OnKeyEvent( KeyEvent& keyEvent );
+  /**
+   * Called when the framework informs the application that the platform surface is destroyed.
+   */
+  virtual void OnSurfaceDestroyed( Any newSurface );
 
 public:
 
