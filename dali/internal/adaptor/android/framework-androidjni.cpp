@@ -70,7 +70,7 @@ enum
 
 struct ApplicationContext
 {
-  JNIEnv* jniEnv;
+  JavaVM* javaVM;
   AAssetManager* assetManager;
   AConfiguration* config;
   ANativeWindow* window;
@@ -92,10 +92,9 @@ struct Framework::Impl
   : mAbortCallBack( nullptr ),
     mCallbackManager( CallbackManager::New() ),
     mLanguage( "NOT_SUPPORTED" ),
-    mRegion( "NOT_SUPPORTED" ),
-    mFinishRequested( false )
+    mRegion( "NOT_SUPPORTED" )
   {
-    applicationContext.framework = static_cast<Framework*>( data );
+    applicationContext.framework = static_cast<Framework*>( data );  // Acquire a pointer to the current JavaVM
   }
 
   ~Impl()
@@ -126,7 +125,6 @@ struct Framework::Impl
   CallbackManager* mCallbackManager;
   std::string mLanguage;
   std::string mRegion;
-  bool mFinishRequested;
 };
 
 Framework::Framework( Framework::Observer& observer, int *argc, char ***argv, Type type )
@@ -163,14 +161,26 @@ void Framework::Run()
 
 unsigned int Framework::AddIdle( int timeout, void* data, bool ( *callback )( void *data ) )
 {
-  JNIEnv* env = applicationContext.jniEnv;
+  JNIEnv *env = nullptr;
+  if( !applicationContext.javaVM || applicationContext.javaVM->GetEnv( reinterpret_cast<void **>( &env ), JNI_VERSION_1_6 ) != JNI_OK )
+  {
+    DALI_LOG_ERROR("Couldn't get JNI env.");
+    return -1;
+  }
+
   jclass clazz = env->FindClass( "com/sec/daliview/DaliView" );
   if ( !clazz )
+  {
+    DALI_LOG_ERROR("Couldn't find com.sec.daliview.DaliView.");
     return -1;
+  }
 
   jmethodID addIdle = env->GetStaticMethodID( clazz, "addIdle", "(JJJ)I" );
   if (!addIdle)
+  {
+    DALI_LOG_ERROR("Couldn't find com.sec.daliview.DaliView.addIdle.");
     return -1;
+  }
 
   jint id = env->CallStaticIntMethod( clazz, addIdle, reinterpret_cast<jlong>( callback ), reinterpret_cast<jlong>( data ), static_cast<jlong>( timeout ) );
   return static_cast<unsigned int>( id );
@@ -178,18 +188,33 @@ unsigned int Framework::AddIdle( int timeout, void* data, bool ( *callback )( vo
 
 void Framework::RemoveIdle( unsigned int id )
 {
-  JNIEnv* env = applicationContext.jniEnv;
+  JNIEnv *env = nullptr;
+  if( !applicationContext.javaVM || applicationContext.javaVM->GetEnv( reinterpret_cast<void **>( &env ), JNI_VERSION_1_6 ) != JNI_OK )
+  {
+    DALI_LOG_ERROR("Couldn't get JNI env.");
+    return;
+  }
+
   jclass clazz = env->FindClass( "com/sec/daliview/DaliView" );
   if( !clazz )
+  {
+    DALI_LOG_ERROR("Couldn't find com.sec.daliview.DaliView.");
     return;
+  }
 
   jmethodID removeIdle = env->GetStaticMethodID( clazz, "removeIdle", "(I)V" );
-  if( removeIdle )
-    env->CallStaticVoidMethod( clazz, removeIdle, static_cast<jint>( id ) );
+  if( !removeIdle )
+  {
+    DALI_LOG_ERROR("Couldn't find com.sec.daliview.DaliView.removeIdle.");
+    return;
+  }
+
+  env->CallStaticVoidMethod( clazz, removeIdle, static_cast<jint>( id ) );
 }
 
 void Framework::Quit()
 {
+  DALI_LOG_ERROR("Quit does nothing for DaliView!");
 }
 
 bool Framework::IsMainLoopRunning()
@@ -230,13 +255,13 @@ std::string Framework::GetDataPath()
 void Framework::SetApplicationContext(void* context)
 {
   memset( &applicationContext, 0, sizeof( ApplicationContext ) );
-  applicationContext.jniEnv = static_cast<JNIEnv*>( context );
+  applicationContext.javaVM = static_cast<JavaVM*>( context );
 }
 
 void* Framework::GetApplicationContext()
 {
-  DALI_ASSERT_ALWAYS( applicationContext.jniEnv && "Failed to get Android context" );
-  return applicationContext.jniEnv;
+  DALI_ASSERT_ALWAYS( applicationContext.javaVM && "Failed to get Android JVM" );
+  return applicationContext.javaVM;
 }
 
 Framework* Framework::GetApplicationFramework()
