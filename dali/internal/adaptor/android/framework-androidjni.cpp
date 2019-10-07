@@ -236,7 +236,6 @@ bool Framework::AppStatusHandler(int type, void* data)
   switch (type)
   {
     case APP_WINDOW_CREATED:
-      AndroidFramework::Get().SetApplicationWindow( static_cast< ANativeWindow* >( data ) );
       if( !mInitialised )
       {
         mObserver.OnInit();
