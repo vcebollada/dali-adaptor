@@ -22,6 +22,7 @@
 #include <fstream>
 
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/android/android-framework.h>
 
 // INTERNAL INCLUDES
 #include <dali/internal/adaptor-framework/common/file-loader-impl.h>

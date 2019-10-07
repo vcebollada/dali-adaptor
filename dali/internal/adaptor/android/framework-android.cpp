@@ -720,7 +720,7 @@ bool Framework::AppStatusHandler(int type, void* data)
         mInitialised = true;
       }
 
-      mObserver.OnReplaceSurface( data );
+      mObserver.OnSurfaceCreated( data );
       mSurfaceCreated = true;
 
       if( mResume )

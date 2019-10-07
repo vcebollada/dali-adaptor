@@ -28,11 +28,15 @@ adaptor_adaptor_ubuntu_src_files=\
 # module: adaptor, backend: android
 adaptor_adaptor_android_src_files=\
     ${adaptor_adaptor_dir}/generic/adaptor-impl-generic.cpp \
-    ${adaptor_adaptor_dir}/android/framework-android.cpp
+    ${adaptor_adaptor_dir}/android/framework-android.cpp \
+    ${adaptor_adaptor_dir}/android/android-framework.cpp \
+    ${adaptor_adaptor_dir}/android/android-framework-impl.cpp
 
 # module: adaptor, backend: androidjni
 adaptor_adaptor_androidjni_src_files=\
     ${adaptor_adaptor_dir}/generic/adaptor-impl-generic.cpp \
-    ${adaptor_adaptor_dir}/android/framework-androidjni.cpp
+    ${adaptor_adaptor_dir}/android/framework-androidjni.cpp \
+    ${adaptor_adaptor_dir}/android/android-framework.cpp \
+    ${adaptor_adaptor_dir}/android/android-framework-impl.cpp
 
 

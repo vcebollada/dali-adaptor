@@ -53,57 +53,6 @@ DALI_ADAPTOR_API bool AddIdleWithReturnValue( Application application, CallbackB
 DALI_ADAPTOR_API std::string GetDataPath();
 
 /**
- * @brief Sets the application context (for example Android native app glue struct)
- * @param[in] context A pointer to platform application context
- */
-DALI_ADAPTOR_API void SetApplicationContext( void* context );
-
-/**
- * @brief Gets the application context
- * @return A platform context
- */
-DALI_ADAPTOR_API void* GetApplicationContext();
-
-/**
- *  Sets the application platform assets.
- *  @param[in] assets A pointer to platform assets
- */
-DALI_ADAPTOR_API void SetApplicationAssets(void* assets);
-
-/**
- * @brief Gets the application platform assets
- * @return platform assets
- */
-DALI_ADAPTOR_API void* GetApplicationAssets();
-
-/**
- * @brief Sets the application platform configuration
- * @param[in] configuration A pointer to platform configuration
- */
-DALI_ADAPTOR_API void SetApplicationConfiguration(void* configuration);
-
-/**
- * @brief Gets the application platform configuration
- * @return A platform configuration
- */
-DALI_ADAPTOR_API void* GetApplicationConfiguration();
-
-/**
- * @brief Gets the application platform window
- * @return A platform window
- */
-DALI_ADAPTOR_API void* GetApplicationWindow();
-
-/**
- * @brief Handles the application lifecycle events.
- * @param[in] application A handle to the Application
- * @param[in] type A type of event
- * @param[in] data The event data
- * @return true if success, false otherwise
- */
-DALI_ADAPTOR_API bool AppStatusHandler( Application application, int type, void* data );
-
-/**
  * @brief Downcasts a ref object to Application handle
  *
  * If handle points to an Actor object, the downcast produces valid handle

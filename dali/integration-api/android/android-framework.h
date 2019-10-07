@@ -18,22 +18,44 @@
  *
  */
 
+// EXTERNAL INCLUDES
 #include <jni.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#include <android/configuration.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
+#ifndef _ANDROID_NATIVE_APP_GLUE_H
+extern "C"{
+struct android_app;
+}
+#endif
+
 #include <dali/dali.h>
 
 namespace Dali
 {
 
+namespace Internal DALI_INTERNAL
+{
+
 namespace Adaptor
+{
+class AndroidFramework;
+}
+
+}
+
+namespace Integration
 {
 
 class DALI_ADAPTOR_API AndroidFramework
 {
 public:
   /**
-   * @brief Create a new Android framework.
+   * @brief Create a new Android framework using the window.
    *
-   * @return a reference to the Android framework
+   * @return a reference to the framework
    */
   static AndroidFramework& New();
 
@@ -51,9 +73,15 @@ public:
 
   /**
    * @brief Sets the JVM
-   * @param[in] jvm A pointer to the JVM
+   * @param[in] jvm A pointer to JVM
    */
   void SetJVM( JavaVM* jvm );
+
+  /**
+   * @brief Sets the JVM
+   * @return A pointer to JVM
+   */
+  JavaVM* GetJVM();
 
   /**
    *  Sets the application assets manager.
@@ -80,15 +108,16 @@ public:
   AConfiguration* GetApplicationConfiguration();
 
   /**
-   * @brief Gets the application native window
+   * @brief Sets the application native window
    * @return A native window
    */
-  ANativeWindow* GetApplicationWindow();
+  void SetApplicationWindow( ANativeWindow* window );
 
   /**
-   * Invoked when the application is to be initialised.
+   * @brief Gets the application native window
+   * @param[in] window A native window
    */
-  void OnInit();
+  ANativeWindow* GetApplicationWindow();
 
   /**
    * Invoked when the application is to be terminated.
@@ -106,14 +135,14 @@ public:
   void OnResume();
 
   /**
-   * Invoked when the application native window is to be replaced.
+   * Invoked when the application native window is created.
    */
-  void OnReplaceWindow( ANativeWindow* window );
+  void OnWindowCreated( ANativeWindow* window );
 
   /**
-   * Invoked when the application native window is to be deleted.
+   * Invoked when the application native window is deleted.
    */
-  void OnDeleteWindow( ANativeWindow* window );
+  void OnWindowDestroyed( ANativeWindow* window );
 
   /**
    * @brief Returns a reference to the instance of the Android framework used by the current thread.
@@ -122,6 +151,11 @@ public:
    * @note This is only valid in the main thread.
    */
   static AndroidFramework& Get();
+
+  /**
+   * @brief Virtual Destructor.
+   */
+  virtual ~AndroidFramework();
 
 private:
 
@@ -138,7 +172,11 @@ private:
 
   Internal::Adaptor::AndroidFramework* mImpl; ///< Implementation object
   friend class Internal::Adaptor::AndroidFramework;
-}
+};
+
+} // namespace Integration
+
+} // namespace Dali
 
 #endif // DALI_INTEGRATION_ANDROID_FRAMEWORK_H
 

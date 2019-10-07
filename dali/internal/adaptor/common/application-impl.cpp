@@ -347,7 +347,7 @@ void Application::OnMemoryLow( Dali::DeviceStatus::Memory::Status status )
   mLowMemorySignal.Emit( status );
 }
 
-void Application::OnReplaceSurface( Any newSurface )
+void Application::OnSurfaceCreated( Any newSurface )
 {
   void* newWindow = AnyCast< void* >( newSurface );
   void* oldWindow = AnyCast< void* >( mMainWindow.GetNativeHandle() );
@@ -361,7 +361,7 @@ void Application::OnReplaceSurface( Any newSurface )
   }
 }
 
-void Application::OnDeleteSurface( Any surface )
+void Application::OnSurfaceDestroyed( Any surface )
 {
   void* windowToDelete = AnyCast< void* >( surface );
   void* oldWindow = AnyCast< void* >( mMainWindow.GetNativeHandle() );
@@ -476,41 +476,6 @@ std::string Application::GetResourcePath()
 std::string Application::GetDataPath()
 {
   return Internal::Adaptor::Framework::GetDataPath();
-}
-
-void Application::SetApplicationContext(void* context)
-{
-  Internal::Adaptor::Framework::SetApplicationContext( context );
-}
-
-void* Application::GetApplicationContext()
-{
-  return Internal::Adaptor::Framework::GetApplicationContext();
-}
-
-void Application::SetApplicationAssets(void* assets)
-{
-  Internal::Adaptor::Framework::SetApplicationAssets( assets );
-}
-
-void* Application::GetApplicationAssets()
-{
-  return Internal::Adaptor::Framework::GetApplicationAssets();
-}
-
-void Application::SetApplicationConfiguration(void* configuration)
-{
-  Internal::Adaptor::Framework::SetApplicationConfiguration( configuration );
-}
-
-void* Application::GetApplicationConfiguration()
-{
-  return Internal::Adaptor::Framework::GetApplicationConfiguration();
-}
-
-void* Application::GetApplicationWindow()
-{
-  return Internal::Adaptor::Framework::GetApplicationWindow();
 }
 
 void Application::SetStyleSheet( const std::string& stylesheet )

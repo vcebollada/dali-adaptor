@@ -19,12 +19,12 @@
 #include <dali/internal/system/android/callback-manager-android.h>
 
 // EXTERNAL INCLUDES
-#include <android_native_app_glue.h>
-
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/android/android-framework.h>
 
 // INTERNAL INCLUDES
 #include <dali/internal/adaptor/common/framework.h>
+#include <dali/internal/adaptor/android/android-framework-impl.h>
 
 namespace Dali
 {
@@ -145,7 +145,7 @@ bool AndroidCallbackManager::AddIdleCallback( CallbackBase* callback, bool hasRe
 
   CallbackData* callbackData = new CallbackData( callback, hasReturnValue );
   callbackData->mRemoveFromContainerFunction = MakeCallback( this, &AndroidCallbackManager::RemoveCallbackFromContainer );
-  callbackData->mIdleId = Framework::GetApplicationFramework()->AddIdle( 0, callbackData, IdleCallback );
+  callbackData->mIdleId = AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).AddIdle( 0, callbackData, IdleCallback );
 
   // add the call back to the container
   mCallbackContainer.push_front( callbackData );
@@ -165,7 +165,7 @@ void AndroidCallbackManager::RemoveIdleCallback( CallbackBase* callback )
     {
       // remove callback data from the container.
       CallbackBase::Execute( *data->mRemoveFromContainerFunction, data );
-      Framework::GetApplicationFramework()->RemoveIdle( data->mIdleId );
+      AndroidFramework::GetFramework( AndroidFramework::Get() ).RemoveIdle( data->mIdleId );
       return;
     }
   }
@@ -181,7 +181,7 @@ bool AndroidCallbackManager::AddIdleEntererCallback( CallbackBase* callback )
   CallbackData* callbackData = new CallbackData( callback, true );
 
   callbackData->mRemoveFromContainerFunction = MakeCallback( this, &AndroidCallbackManager::RemoveCallbackFromContainer );
-  callbackData->mIdleId = Framework::GetApplicationFramework()->AddIdle( 0, callbackData, IdleCallback );
+  callbackData->mIdleId = AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).AddIdle( 0, callbackData, IdleCallback );
 
   // add the call back to the container
   mCallbackContainer.push_front( callbackData );
@@ -201,7 +201,7 @@ void AndroidCallbackManager::RemoveIdleEntererCallback( CallbackBase* callback )
     {
       // remove callback data from the container.
       CallbackBase::Execute( *data->mRemoveFromContainerFunction, data );
-      Framework::GetApplicationFramework()->RemoveIdle( data->mIdleId );
+      AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).RemoveIdle( data->mIdleId );
       return;
     }
   }
@@ -218,7 +218,7 @@ void AndroidCallbackManager::RemoveAllCallbacks()
   for( CallbackList::iterator  iter =  mCallbackContainer.begin(); iter != mCallbackContainer.end(); ++iter )
   {
     CallbackData* data = (*iter);
-    Framework::GetApplicationFramework()->RemoveIdle( data->mIdleId );
+    AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).RemoveIdle( data->mIdleId );
     delete data;
   }
   mCallbackContainer.clear();

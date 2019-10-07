@@ -18,13 +18,10 @@
 // INTERNAL HEADERS
 #include <dali/internal/adaptor/common/framework.h>
 #include <dali/internal/window-system/common/window-system.h>
-#include <dali/devel-api/adaptor-framework/keyboard.h>
 
 // EXTERNAL_HEADERS
 #include <dali/integration-api/debug.h>
-
-// Android
-#include <native_window.h>
+#include <dali/integration-api/android/android-framework.h>
 
 namespace Dali
 {
@@ -48,7 +45,7 @@ void Shutdown()
 
 void GetScreenSize( int& width, int& height )
 {
-  ANativeWindow* window = static_cast<ANativeWindow*>( Framework::GetApplicationWindow() );
+  ANativeWindow* window = Dali::Integration::AndroidFramework::Get().GetApplicationWindow();
   width = ANativeWindow_getWidth( window );
   height = ANativeWindow_getHeight( window );
   DALI_LOG_WARNING( "Native window width %d, height %d", width, height );

@@ -42,46 +42,6 @@ std::string GetDataPath()
   return Internal::Adaptor::Application::GetDataPath();
 }
 
-void SetApplicationContext( void* context )
-{
-  Internal::Adaptor::Application::SetApplicationContext( context );
-}
-
-void* GetApplicationContext()
-{
-  return Internal::Adaptor::Application::GetApplicationContext();
-}
-
-void SetApplicationAssets( void* assets )
-{
-  Internal::Adaptor::Application::SetApplicationAssets( assets );
-}
-
-void* GetApplicationAssets()
-{
-  return Internal::Adaptor::Application::GetApplicationAssets();
-}
-
-void SetApplicationConfiguration( void* configuration )
-{
-  Internal::Adaptor::Application::SetApplicationConfiguration( configuration );
-}
-
-void* GetApplicationConfiguration()
-{
-  return Internal::Adaptor::Application::GetApplicationConfiguration();
-}
-
-void* GetApplicationWindow()
-{
-  return Internal::Adaptor::Application::GetApplicationWindow();
-}
-
-bool AppStatusHandler( Application application, int type, void* data )
-{
-  return Internal::Adaptor::GetImplementation( application ).AppStatusHandler( type, data );
-}
-
 Application DownCast( Dali::RefObject* refObject )
 {
   return Application( dynamic_cast<Dali::Internal::Adaptor::Application*>( refObject ) );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2019 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,14 @@
 #include <dali/internal/adaptor/common/framework.h>
 
 // EXTERNAL INCLUDES
-#include <unistd.h>
-#include <queue>
-#include <unordered_set>
-
-#include <jni.h>
-#include <sys/types.h>
-#include <android/log.h>
-#include <android/asset_manager.h>
-#include <android/asset_manager_jni.h>
-#include <android/configuration.h>
-#include <android/native_window.h>
-#include <android/native_window_jni.h>
-
 #include <dali/integration-api/debug.h>
-#include <dali/public-api/events/touch-point.h>
-#include <dali/public-api/events/key-event.h>
+#include <dali/integration-api/android/android-framework.h>
 #include <dali/public-api/adaptor-framework/application.h>
 #include <dali/devel-api/adaptor-framework/application-devel.h>
 
 // INTERNAL INCLUDES
 #include <dali/internal/adaptor/common/application-impl.h>
+#include <dali/internal/adaptor/android/android-framework-impl.h>
 #include <dali/internal/system/common/callback-manager.h>
 
 using namespace Dali;
@@ -53,34 +40,6 @@ namespace Internal
 namespace Adaptor
 {
 
-namespace
-{
-
-/// Application Status Enum
-enum
-{
-  APP_WINDOW_CREATED = 0,
-  APP_WINDOW_DESTROYED,
-  APP_PAUSE,
-  APP_RESUME,
-  APP_RESET,
-  APP_LANGUAGE_CHANGE,
-  APP_DESTROYED,
-};
-
-struct ApplicationContext
-{
-  JavaVM* javaVM;
-  AAssetManager* assetManager;
-  AConfiguration* config;
-  ANativeWindow* window;
-  Framework* framework;
-};
-
-struct ApplicationContext applicationContext;
-
-} // Unnamed namespace
-
 /**
  * Impl to hide android data members
  */
@@ -88,18 +47,18 @@ struct Framework::Impl
 {
   // Constructor
 
-  Impl(void* data)
+  Impl( Framework* framework )
   : mAbortCallBack( nullptr ),
     mCallbackManager( CallbackManager::New() ),
     mLanguage( "NOT_SUPPORTED" ),
     mRegion( "NOT_SUPPORTED" )
   {
-    applicationContext.framework = static_cast<Framework*>( data );  // Acquire a pointer to the current JavaVM
+    AndroidFramework::GetImplementation( AndroidFramework::Get() ).SetFramework( framework );
   }
 
   ~Impl()
   {
-    applicationContext.framework = nullptr;
+    AndroidFramework::GetImplementation( AndroidFramework::Get() ).SetFramework( nullptr );
 
     delete mAbortCallBack;
     mAbortCallBack = nullptr;
@@ -162,7 +121,8 @@ void Framework::Run()
 unsigned int Framework::AddIdle( int timeout, void* data, bool ( *callback )( void *data ) )
 {
   JNIEnv *env = nullptr;
-  if( !applicationContext.javaVM || applicationContext.javaVM->GetEnv( reinterpret_cast<void **>( &env ), JNI_VERSION_1_6 ) != JNI_OK )
+  JavaVM* javaVM = AndroidFramework::Get().GetJVM();
+  if( javaVM == nullptr || javaVM->GetEnv( reinterpret_cast<void **>( &env ), JNI_VERSION_1_6 ) != JNI_OK )
   {
     DALI_LOG_ERROR("Couldn't get JNI env.");
     return -1;
@@ -189,7 +149,8 @@ unsigned int Framework::AddIdle( int timeout, void* data, bool ( *callback )( vo
 void Framework::RemoveIdle( unsigned int id )
 {
   JNIEnv *env = nullptr;
-  if( !applicationContext.javaVM || applicationContext.javaVM->GetEnv( reinterpret_cast<void **>( &env ), JNI_VERSION_1_6 ) != JNI_OK )
+  JavaVM* javaVM = AndroidFramework::Get().GetJVM();
+  if( javaVM == nullptr || javaVM->GetEnv( reinterpret_cast<void **>( &env ), JNI_VERSION_1_6 ) != JNI_OK )
   {
     DALI_LOG_ERROR("Couldn't get JNI env.");
     return;
@@ -252,51 +213,6 @@ std::string Framework::GetDataPath()
   return "";
 }
 
-void Framework::SetApplicationContext(void* context)
-{
-  memset( &applicationContext, 0, sizeof( ApplicationContext ) );
-  applicationContext.javaVM = static_cast<JavaVM*>( context );
-}
-
-void* Framework::GetApplicationContext()
-{
-  DALI_ASSERT_ALWAYS( applicationContext.javaVM && "Failed to get Android JVM" );
-  return applicationContext.javaVM;
-}
-
-Framework* Framework::GetApplicationFramework()
-{
-  DALI_ASSERT_ALWAYS( applicationContext.framework && "Failed to get Android framework" );
-  return applicationContext.framework;
-}
-
-void* Framework::GetApplicationAssets()
-{
-  DALI_ASSERT_ALWAYS( applicationContext.assetManager && "Failed to get Android Asset manager" );
-  return applicationContext.assetManager;
-}
-
-void Framework::SetApplicationAssets(void* assets)
-{
-  applicationContext.assetManager = static_cast<AAssetManager*>( assets );
-}
-
-void* Framework::GetApplicationConfiguration()
-{
-  DALI_ASSERT_ALWAYS( applicationContext.config && "Failed to get Android configuration" );
-  return applicationContext.config;
-}
-
-void Framework::SetApplicationConfiguration(void* configuration)
-{
-  applicationContext.config = static_cast<AConfiguration*>( configuration );
-}
-
-void* Framework::GetApplicationWindow()
-{
-  return applicationContext.window;
-}
-
 void Framework::SetBundleId(const std::string& id)
 {
   mBundleId = id;
@@ -320,18 +236,18 @@ bool Framework::AppStatusHandler(int type, void* data)
   switch (type)
   {
     case APP_WINDOW_CREATED:
-      applicationContext.window = static_cast< ANativeWindow* >( data );
+      AndroidFramework::Get().SetApplicationWindow( static_cast< ANativeWindow* >( data ) );
       if( !mInitialised )
       {
         mObserver.OnInit();
         mInitialised = true;
       }
 
-      mObserver.OnReplaceSurface( data );
+      mObserver.OnSurfaceCreated( data );
       break;
 
     case APP_WINDOW_DESTROYED:
-      mObserver.OnReplaceSurface( data );
+      mObserver.OnSurfaceDestroyed( data );
       break;
 
     case APP_RESET:

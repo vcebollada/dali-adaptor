@@ -121,23 +121,29 @@ public:
     virtual void OnLanguageChanged() {}
 
     /**
-    * Invoked when the region is changed.
-    */
+     * Invoked when the region is changed.
+     */
     virtual void OnRegionChanged() {}
 
     /**
-    * Invoked when the battery level of the device is low.
-    */
+     * Invoked when the battery level of the device is low.
+     */
     virtual void OnBatteryLow( Dali::DeviceStatus::Battery::Status status ) {}
 
     /**
-    * Invoked when the memory level of the device is low.
-    */
+     * Invoked when the memory level of the device is low.
+     */
     virtual void OnMemoryLow( Dali::DeviceStatus::Memory::Status status ) {}
 
-    virtual void OnReplaceSurface( Any newSurface ) {}
+    /**
+     * Invoked when the platform surface is created.
+     */
+    virtual void OnSurfaceCreated( Any newSurface ) {}
 
-    virtual void OnDeleteSurface( Any newSurface ) {}
+    /**
+     * Invoked when the platform surface is destroyed.
+     */
+    virtual void OnSurfaceDestroyed( Any newSurface ) {}
 
     virtual void OnTouchEvent( TouchPoint& touchPoint, int timeStamp ) {}
 
@@ -220,46 +226,6 @@ public:
   static std::string GetDataPath();
 
   /**
-   *  Gets the application platform assets.
-   */
-  static void* GetApplicationContext();
-
-  /**
-   *  Sets the application platform context.
-   */
-  static void SetApplicationContext(void* context);
-
-  /**
-   *  Gets the application platform assets.
-   */
-  static void* GetApplicationAssets();
-
-  /**
-   *  Sets the application platform assets.
-   */
-  static void SetApplicationAssets(void* assets);
-
-  /**
-   *  Gets the application platform configuration.
-   */
-  static void* GetApplicationConfiguration();
-
-  /**
-   *  Gets the application platform configuration.
-   */
-  static void SetApplicationConfiguration(void* configuration);
-
-  /**
-   *  Gets the application platform window.
-   */
-  static void* GetApplicationWindow();
-
-  /**
-   *  Gets the application framework.
-   */
-  static Framework* GetApplicationFramework();
-
-  /**
    * Sets system language.
    */
   void SetLanguage( const std::string& language );
@@ -286,10 +252,19 @@ public:
    */
   bool AppStatusHandler(int type, void* data);
 
-
+  /**
+   * Called by the adaptor when an idle callback is added.
+   * @param[in] timeout The timeout of the callback.
+   * @param[in] data The data of of the callback.
+   * @param[in] callback The callback.
+   * @return The callback id.
+   */
   unsigned int AddIdle( int timeout, void* data, bool ( *callback )( void *data ) );
 
-
+  /**
+   * Called by the adaptor when an idle callback is removed.
+   * @param[in] id The callback id.
+   */
   void RemoveIdle( unsigned int id );
 
 private:
