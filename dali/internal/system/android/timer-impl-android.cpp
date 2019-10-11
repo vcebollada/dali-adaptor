@@ -37,16 +37,61 @@ namespace Internal
 namespace Adaptor
 {
 
+namespace
+{
+
+// Copied from x server
+static unsigned int GetCurrentMilliSeconds()
+{
+  struct timeval tv;
+
+  struct timespec tp;
+  static clockid_t clockid;
+
+  if (!clockid)
+  {
+#ifdef CLOCK_MONOTONIC_COARSE
+    if (clock_getres(CLOCK_MONOTONIC_COARSE, &tp) == 0 &&
+      (tp.tv_nsec / 1000) <= 1000 && clock_gettime(CLOCK_MONOTONIC_COARSE, &tp) == 0)
+    {
+      clockid = CLOCK_MONOTONIC_COARSE;
+    }
+    else
+#endif
+    if (clock_gettime(CLOCK_MONOTONIC, &tp) == 0)
+    {
+      clockid = CLOCK_MONOTONIC;
+    }
+    else
+    {
+      clockid = ~0L;
+    }
+  }
+  if (clockid != ~0L && clock_gettime(clockid, &tp) == 0)
+  {
+    return (tp.tv_sec * 1000) + (tp.tv_nsec / 1000000L);
+  }
+
+  gettimeofday(&tv, NULL);
+  return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+}
+
+}
+
 struct Timer::Impl
 {
   Impl( unsigned int milliSec )
   : mInterval( milliSec ),
+    mStartTimestamp( 0 ),
+    mPauseTimestamp( 0 ),
     mRunning( false ),
     mId( 0 )
   {
   }
 
   unsigned int mInterval;
+  unsigned int mStartTimestamp;
+  unsigned int mPauseTimestamp;
   bool mRunning;
   unsigned int mId;
 };
@@ -91,6 +136,7 @@ void Timer::Start()
 
   mImpl->mId = AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).AddIdle( mImpl->mInterval, this, TimerCallback );
   mImpl->mRunning = true;
+  mImpl->mStartTimestamp = GetCurrentMilliSeconds();
 }
 
 void Timer::Stop()
@@ -101,6 +147,8 @@ void Timer::Stop()
   if( mImpl->mId != 0 )
   {
     AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).RemoveIdle( mImpl->mId );
+    mImpl->mStartTimestamp = 0;
+    mImpl->mPauseTimestamp = 0;
   }
 
   ResetTimerData();
@@ -113,7 +161,7 @@ void Timer::Pause()
 
   if( mImpl->mRunning )
   {
-    // TODO: Add pause
+    mImpl->mPauseTimestamp = GetCurrentMilliSeconds();
     AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).RemoveIdle( mImpl->mId );
     mImpl->mId = 0;
   }
@@ -126,8 +174,16 @@ void Timer::Resume()
 
   if( mImpl->mRunning && mImpl->mId == 0 )
   {
-    // TODO: Add resume
-    mImpl->mId = AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).AddIdle( mImpl->mInterval, this, TimerCallback );
+    unsigned int newInterval = 0;
+    unsigned int runningTime = mImpl->mPauseTimestamp - mImpl->mStartTimestamp;
+    if( mImpl->mInterval > runningTime )
+    {
+      newInterval = mImpl->mInterval - runningTime;
+    }
+
+    mImpl->mStartTimestamp = GetCurrentMilliSeconds() - runningTime;
+    mImpl->mPauseTimestamp = 0;
+    mImpl->mId = AndroidFramework::GetFramework( Dali::Integration::AndroidFramework::Get() ).AddIdle( newInterval, this, TimerCallback );
   }
 }
 
