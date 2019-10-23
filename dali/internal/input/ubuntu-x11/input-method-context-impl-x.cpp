@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/internal/input/linux/dali-ecore-imf.h>
 #include <dali/internal/input/ubuntu-x11/dali-ecore-input.h>
+#include <dali/internal/system/linux/dali-ecore.h>
 #include <dali/public-api/events/key-event.h>
 #include <dali/public-api/adaptor-framework/key.h>
 #include <dali/public-api/object/type-registry.h>
@@ -783,6 +784,13 @@ Dali::InputMethodContext::InputPanelLanguage InputMethodContextX::GetInputPanelL
   return Dali::InputMethodContext::InputPanelLanguage::AUTOMATIC;
 }
 
+void InputMethodContextX::SetInputPanelPosition( unsigned int x, unsigned int y )
+{
+  DALI_LOG_INFO( gLogFilter, Debug::General, "InputMethodContextX::SetInputPanelPosition\n" );
+
+  // ecore_imf_context_input_panel_position_set() is supported from ecore-imf 1.21.0 version.
+}
+
 bool InputMethodContextX::ProcessEventKeyDown( const KeyEvent& keyEvent )
 {
   bool eventHandled( false );
@@ -802,11 +810,17 @@ bool InputMethodContextX::ProcessEventKeyDown( const KeyEvent& keyEvent )
     ecoreKeyDownEvent.timestamp = keyEvent.time;
     ecoreKeyDownEvent.modifiers = EcoreInputModifierToEcoreIMFModifier( keyEvent.keyModifier );
     ecoreKeyDownEvent.locks = EcoreInputModifierToEcoreIMFLock( keyEvent.keyModifier );
-#ifdef ECORE_IMF_1_13
+
+#if defined(ECORE_VERSION_MAJOR) && (ECORE_VERSION_MAJOR >= 1) && defined(ECORE_VERSION_MINOR)
+#if (ECORE_VERSION_MINOR >= 14)
     ecoreKeyDownEvent.dev_name  = "";
     ecoreKeyDownEvent.dev_class = ECORE_IMF_DEVICE_CLASS_KEYBOARD;
     ecoreKeyDownEvent.dev_subclass = ECORE_IMF_DEVICE_SUBCLASS_NONE;
-#endif // ECORE_IMF_1_13
+#endif // Since ecore_imf 1.14 version
+#if (ECORE_VERSION_MINOR >= 22)
+    ecoreKeyDownEvent.keycode = keyEvent.keyCode;
+#endif // Since ecore_imf 1.22 version
+#endif // Since ecore_imf Version 1
 
     // If the device is IME and the focused key is the direction keys, then we should send a key event to move a key cursor.
     if ((keyEvent.GetDeviceName() == "ime") && ((!strncmp(keyEvent.keyPressedName.c_str(), "Left", 4)) ||
@@ -856,9 +870,14 @@ bool InputMethodContextX::ProcessEventKeyUp( const KeyEvent& keyEvent )
     ecoreKeyUpEvent.timestamp = keyEvent.time;
     ecoreKeyUpEvent.modifiers = EcoreInputModifierToEcoreIMFModifier( keyEvent.keyModifier );
     ecoreKeyUpEvent.locks = EcoreInputModifierToEcoreIMFLock( keyEvent.keyModifier );
-#ifdef ECORE_IMF_1_13
+#if defined(ECORE_VERSION_MAJOR) && (ECORE_VERSION_MAJOR >= 1) && defined(ECORE_VERSION_MINOR)
+#if (ECORE_VERSION_MINOR >= 14)
     ecoreKeyUpEvent.dev_name  = "";
-#endif // ECORE_IMF_1_13
+#endif // Since ecore_imf 1.14 version
+#if (ECORE_VERSION_MINOR >= 22)
+    ecoreKeyUpEvent.keycode = keyEvent.keyCode;
+#endif // Since ecore_imf 1.22 version
+#endif // Since ecore_imf Version 1
 
     eventHandled = ecore_imf_context_filter_event(mIMFContext,
                                                   ECORE_IMF_EVENT_KEY_UP,
