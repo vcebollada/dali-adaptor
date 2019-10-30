@@ -19,7 +19,7 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali/integration-api/egl-interface.h>
+#include <dali/integration-api/adaptor-framework/egl-interface.h>
 #include <dali/internal/graphics/gles/egl-implementation.h>
 #include <dali/internal/window-system/common/pixmap-render-surface.h>
 #include <dali/public-api/dali-adaptor-common.h>

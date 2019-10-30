@@ -25,11 +25,7 @@
 #include <android_native_app_glue.h>
 
 #include <dali/integration-api/debug.h>
-#ifdef DALI_ADAPTOR_COMPILATION
-#include <dali/integration-api/adaptor.h>
-#else
-#include <dali/integration-api/adaptors/adaptor.h>
-#endif
+#include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/android/android-framework.h>
 #include <dali/public-api/events/touch-point.h>
 #include <dali/public-api/events/key-event.h>
