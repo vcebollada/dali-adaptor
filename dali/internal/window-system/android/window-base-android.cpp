@@ -339,13 +339,8 @@ void WindowBaseAndroid::SetTransparency( bool transparent )
 {
 }
 
-void WindowBaseAndroid::SetParent( Any parent )
+void WindowBaseAndroid::SetParent( WindowBase* parentWinBase )
 {
-}
-
-bool WindowBaseAndroid::IsMatchedWindow( Any window )
-{
-  return false;
 }
 
 } // namespace Adaptor
