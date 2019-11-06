@@ -104,8 +104,6 @@ include_directories(${ANDROID_NDK}/sources)
 include_directories(${ANDROID_NDK}/sources/android)
 include_directories(${ANDROID_NDK}/sources/android/native_app_glue)
 include_directories(${ANDROID_NDK}/sysroot/usr/include/android)
-add_library(native_app_glue STATIC
-    ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 ENDIF()
 
 IF( enable_wayland )
@@ -280,11 +278,15 @@ if( NOT ANDROID )
 ENDIF()
 
 IF( ANDROID )
+  CHECK_MODULE_AND_SET( PIXMAN pixman-1 [] )
+  CHECK_MODULE_AND_SET( EXPAT expat [] )
+
   SET( DALI_CFLAGS ${DALI_CFLAGS}
-    ${FRIBIDI_LDFLAGS}
+    ${FRIBIDI_CFLAGS}
+    ${PIXMAN_CFLAGS}
   )
 
-  LIST( APPEND DALI_LDFLAGS ${FRIBIDI_LDFLAGS} native_app_glue android log EGL GLESv3 )
+  LIST( APPEND DALI_LDFLAGS ${FRIBIDI_LDFLAGS} ${FREETYPE_LDFLAGS} ${PIXMAN_LDFLAGS} ${EXPAT_LDFLAGS} z android log EGL GLESv3)
 ENDIF()
 
 # EVAS used indicator
@@ -422,7 +424,11 @@ ENDIF()
 IF( NOT COMMON_PROFILE )
   ADD_DEFINITIONS( -DWAYLAND_EXTENSIONS_SUPPORTED )
 ENDIF()
-
+# had to do it here for Android by some reason, even if it is set above already
+IF( ANDROID_PROFILE )
+SET( daliReadOnlyDir $ENV{DALI_DATA_RO_DIR} )
+SET( daliReadWriteDir $ENV{DALI_DATA_RW_DIR} )
+ENDIF()
 SET( daliDefaultThemeDir ${dataReadWriteDir}/theme/ )
 
 SET( fontPreloadedPath $ENV{FONT_PRELOADED_PATH} )
@@ -430,15 +436,15 @@ SET( fontDownloadedPath $ENV{FONT_DOWNLOADED_PATH} )
 SET( fontApplicationPath $ENV{FONT_APPLICATION_PATH} )
 
 # Configure paths
-ADD_DEFINITIONS(  -DDALI_DATA_RW_DIR="\"${daliReadWriteDir}\""
-                  -DDALI_DATA_RO_DIR="\"${daliReadOnlyDir}\""
-                  -DDALI_DEFAULT_FONT_CACHE_DIR="\"${daliDefaultFontCacheDir}\""
-                  -DDALI_USER_FONT_CACHE_DIR="\"${daliUserFontCacheDir}\""
-                  -DDALI_SHADERBIN_DIR="\"${daliShaderbinCacheDir}\""
-                  -DDALI_DEFAULT_THEME_DIR="\"${daliDefaultThemeDir}\""
-                  -DFONT_PRELOADED_PATH="\"${fontPreloadedPath}\""
-                  -DFONT_DOWNLOADED_PATH="\"${fontDownloadedPath}\""
-                  -DFONT_APPLICATION_PATH="\"${fontApplicationPath}\""
-                  -DFONT_CONFIGURATION_FILE="\"${fontConfigurationFile}\""
+ADD_DEFINITIONS(  -DDALI_DATA_RW_DIR="${daliReadWriteDir}"
+                  -DDALI_DATA_RO_DIR="${daliReadOnlyDir}"
+                  -DDALI_DEFAULT_FONT_CACHE_DIR="${daliDefaultFontCacheDir}"
+                  -DDALI_USER_FONT_CACHE_DIR="${daliUserFontCacheDir}"
+                  -DDALI_SHADERBIN_DIR="${daliShaderbinCacheDir}"
+                  -DDALI_DEFAULT_THEME_DIR="${daliDefaultThemeDir}"
+                  -DFONT_PRELOADED_PATH="${fontPreloadedPath}"
+                  -DFONT_DOWNLOADED_PATH="${fontDownloadedPath}"
+                  -DFONT_APPLICATION_PATH="${fontApplicationPath}"
+                  -DFONT_CONFIGURATION_FILE="${fontConfigurationFile}"
                   -DTIZEN_PLATFORM_CONFIG_SUPPORTED=${tizenPlatformConfigSupported}
 )
