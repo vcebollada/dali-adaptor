@@ -33,9 +33,6 @@ IF( print_help )
   EXIT()
 ENDIF()
 
-SET( FREETYPE_REQUIRED 6.16.0 )
-SET( FREETYPE_BITMAP_SUPPORT_VERSION 17.1.11 )
-
 if( ANDROID )
   SET( enable_profile ANDROID )
 ENDIF()
@@ -53,6 +50,15 @@ ENDIF()
 
 # Defines profile specific variable
 SET( ${enable_profile}_PROFILE 1 )
+
+# TODO check what version we really need fro Android
+IF( ANDROID_PROFILE )
+SET( FREETYPE_REQUIRED 6.16.0 )
+SET( FREETYPE_BITMAP_SUPPORT_VERSION 6.16.0 )
+else()
+SET( FREETYPE_REQUIRED 9.16.3 )
+SET( FREETYPE_BITMAP_SUPPORT_VERSION 17.1.11 )
+endif()
 
 # checking all possibly used modules (required and optionals)
 CHECK_MODULE_AND_SET( EXIF exif exif_available )
@@ -98,7 +104,7 @@ CHECK_MODULE_AND_SET( CAPI_APPFW_CONTROL capi-appfw-app-control [] )
 
 CHECK_MODULE_AND_SET( DALICORE dali-core [] )
 
-IF( ANDROID )
+IF( ANDROID_PROFILE )
 include_directories(${ANDROID_NDK})
 include_directories(${ANDROID_NDK}/sources)
 include_directories(${ANDROID_NDK}/sources/android)
@@ -271,13 +277,15 @@ SET( DALI_LDFLAGS
   -ljpeg
 )
 
-if( NOT ANDROID )
+# Android includes pthread with android lib
+if( NOT ANDROID_PROFILE )
   SET( DALI_LDFLAGS ${DALI_LDFLAGS}
     -lpthread
   )
 ENDIF()
 
-IF( ANDROID )
+# You need to include manually other libs deps in order to link for Android
+IF( ANDROID_PROFILE )
   CHECK_MODULE_AND_SET( PIXMAN pixman-1 [] )
   CHECK_MODULE_AND_SET( EXPAT expat [] )
 
