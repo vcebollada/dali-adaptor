@@ -4,7 +4,6 @@ SET( adaptor_imaging_common_src_files
     ${adaptor_imaging_dir}/common/native-bitmap-buffer-impl.cpp 
     ${adaptor_imaging_dir}/common/pixel-buffer-impl.cpp 
     ${adaptor_imaging_dir}/common/alpha-mask.cpp 
-    ${adaptor_imaging_dir}/common/file-download.cpp 
     ${adaptor_imaging_dir}/common/gaussian-blur.cpp 
     ${adaptor_imaging_dir}/common/http-utils.cpp 
     ${adaptor_imaging_dir}/common/image-loader.cpp 
@@ -23,6 +22,7 @@ SET( adaptor_imaging_common_src_files
 
 # module: imaging, backend: tizen
 SET( adaptor_imaging_tizen_src_files 
+    ${adaptor_imaging_dir}/common/file-download.cpp 
     ${adaptor_imaging_dir}/tizen/native-image-source-factory-tizen.cpp 
     ${adaptor_imaging_dir}/tizen/native-image-source-impl-tizen.cpp 
     ${adaptor_imaging_dir}/tizen/native-image-source-queue-impl-tizen.cpp
@@ -30,6 +30,7 @@ SET( adaptor_imaging_tizen_src_files
 
 # module: imaging, backend: ubuntu-x11
 SET( adaptor_imaging_ubuntu_x11_src_files 
+    ${adaptor_imaging_dir}/common/file-download.cpp 
     ${adaptor_imaging_dir}/ubuntu-x11/native-image-source-factory-x.cpp 
     ${adaptor_imaging_dir}/ubuntu-x11/native-image-source-impl-x.cpp 
     ${adaptor_imaging_dir}/ubuntu-x11/native-image-source-queue-impl-x.cpp
@@ -37,7 +38,16 @@ SET( adaptor_imaging_ubuntu_x11_src_files
 
 # module: imaging, backend: android
 SET( adaptor_imaging_android_src_files
+    ${adaptor_imaging_dir}/common/file-download.cpp 
     ${adaptor_imaging_dir}/android/native-image-source-factory-android.cpp
     ${adaptor_imaging_dir}/android/native-image-source-impl-android.cpp
     ${adaptor_imaging_dir}/android/native-image-source-queue-impl-android.cpp
+)
+
+# module: imaging, backend: windows
+SET( adaptor_imaging_windows_src_files
+    ${adaptor_imaging_dir}/windows/curl-environment-win.cpp
+    ${adaptor_imaging_dir}/windows/file-download-win.cpp
+    ${adaptor_imaging_dir}/windows/native-image-source-factory-win.cpp
+    ${adaptor_imaging_dir}/windows/native-image-source-impl-win.cpp
 )

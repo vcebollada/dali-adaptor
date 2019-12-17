@@ -1,20 +1,19 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 CMAKE_POLICY(SET CMP0012 NEW) # Prevent dereferencing of OFF/ON as variables
 
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_C_STANDARD 99)
-
 PROJECT(${name} CXX)
 SET(PKG_NAME ${name})
 
 SET(name "dali-adaptor")
 
 SET(GCC_COMPILER_VERSION_REQUIRED "6")
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS GCC_COMPILER_VERSION_REQUIRED)
-    message(FATAL_ERROR "The GCC required compiler version is " ${GCC_COMPILER_VERSION_REQUIRED})
-  endif()
-endif()
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  IF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS GCC_COMPILER_VERSION_REQUIRED)
+    MESSAGE(FATAL_ERROR "The GCC required compiler version is " ${GCC_COMPILER_VERSION_REQUIRED})
+  ENDIF()
+ENDIF()
 
 # Include additional macros
 INCLUDE( common.cmake )
@@ -44,12 +43,29 @@ SET(${name}_VERSION ${${name}_VERSION_MAJOR}.${${name}_VERSION_MINOR}.${${name}_
 
 SET(DALI_ADAPTOR_VERSION ${${name}_VERSION} )
 
-ADD_DEFINITIONS(-DPLATFORM_TIZEN)
-ADD_DEFINITIONS(-DPIC -DSTDC_HEADERS)
+MESSAGE( "Compiler : " ${CMAKE_CXX_COMPILER_ID} )
 
-IF("${ARCH}" STREQUAL "arm")
-  ADD_DEFINITIONS("-DTARGET")
-ENDIF("${ARCH}" STREQUAL "arm")
+IF( WIN32 ) # WIN32 includes x64 as well according to the cmake doc.
+  FIND_PACKAGE( dali-windows-dependencies REQUIRED)
+  FIND_PACKAGE( dali-core REQUIRED)
+  FIND_PATH( SYSTEM_INCLUDE_DIR "dali-windows-dependencies.h" )
+ENDIF()
+
+IF( UNIX )
+  ADD_DEFINITIONS(-DPLATFORM_TIZEN)
+  ADD_DEFINITIONS(-DPIC -DSTDC_HEADERS)
+
+  IF("${ARCH}" STREQUAL "arm")
+    ADD_DEFINITIONS("-DTARGET")
+  ENDIF("${ARCH}" STREQUAL "arm")
+ELSEIF( WIN32 ) # WIN32 includes x64 as well according to the cmake doc.
+  IF(NOT DEFINED STATIC)
+    ADD_DEFINITIONS( "-DBUILDING_DALI_ADAPTOR" )
+  ENDIF()
+  
+  ADD_DEFINITIONS( "-DDALI_ADAPTOR_COMPILATION" )
+  ADD_DEFINITIONS( "-D_NSIG=65" )
+ENDIF()
 
 # Deployment folder should come from spec file or command line:
 SET( PREFIX ${CMAKE_INSTALL_PREFIX})
@@ -65,27 +81,33 @@ IF( NOT INCLUDE_DIR )
 ENDIF()
 
 # Set up the lib dir
-SET( LIB_DIR $ENV{libdir} )
-IF( NOT LIB_DIR )
-  SET( LIB_DIR ${CMAKE_INSTALL_LIBDIR} )
-ENDIF()
-IF( NOT LIB_DIR )
+IF( USE_VCPKG )
   SET( LIB_DIR ${PREFIX}/lib )
+  SET( BIN_DIR ${PREFIX}/bin )
+ELSE()
+  SET( LIB_DIR $ENV{libdir} )
+  IF( NOT LIB_DIR )
+    SET( LIB_DIR ${CMAKE_INSTALL_LIBDIR} )
+  ENDIF()
+  IF( NOT LIB_DIR )
+    SET( LIB_DIR ${PREFIX}/lib )
+  ENDIF()
 ENDIF()
 
-INCLUDE( deps-check.cmake )
+IF( NOT USE_VCPKG )
+  INCLUDE( deps-check.cmake )
+ENDIF()
 
 # Set up compiler flags and warnings
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
-#ADD_COMPILE_OPTIONS( -Wnon-virtual-dtor -Woverloaded-virtual -Wold-style-cast )
-
-# TODO: Clang is a lot more strict with warnings, we should address
-# those issues at some point.
-#IF( NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  #ADD_COMPILE_OPTIONS( -Werror )
-#ENDIF()
-
-ADD_COMPILE_OPTIONS( -Wall ${DALI_CFLAGS} )# -Wextra -Wno-unused-parameter )# -Wfloat-equal )
+IF( UNIX )
+  ADD_COMPILE_OPTIONS( -Wall ${DALI_CFLAGS} )# -Wextra -Wno-unused-parameter )# -Wfloat-equal )
+ELSEIF( WIN32 ) # WIN32 includes x64 as well according to the cmake doc.
+  ADD_COMPILE_OPTIONS( /FIdali-windows-dependencies.h ) # Adds missing definitions.
+  ADD_COMPILE_OPTIONS( /FIextern-definitions.h )        # Adds missing definitions.
+  ADD_COMPILE_OPTIONS( /FIpreprocessor-definitions.h )  # Adds missing definitions.
+  ADD_COMPILE_OPTIONS( /vmg )                           # Avoids a 'reinterpret_cast' compile error while compiling signals and callbacks.
+  ADD_COMPILE_OPTIONS( /TP )                            # All files considered C++
+ENDIF()
 
 ADD_DEFINITIONS( -DNON_POWER_OF_TWO_TEXTURES
                  ${DEFINITIONS} )
@@ -107,19 +129,34 @@ INCLUDE( module-list.cmake )
 # Include profile specific setup
 INCLUDE( profiles/${PROFILE_LCASE}-profile.cmake )
 
-# Configure the pkg-config file
-# Requires the following variables to be setup:
-# @PREFIX@ @EXEC_PREFIX@ @DALI_ADAPTOR_VERSION@ @LIB_DIR@ @DEV_INCLUDE_PATH@
-SET( DEV_INCLUDE_PATH ${INCLUDE_DIR} )
-SET( ADAPTOR_PKG_CFG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/dali-adaptor.pc )
-SET( ADAPTOR_INTEGRATION_PKG_CFG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/dali-adaptor-integration.pc )
-CONFIGURE_FILE( ${ADAPTOR_PKG_CFG_FILE}.in ${ADAPTOR_PKG_CFG_FILE} @ONLY )
-CONFIGURE_FILE( ${ADAPTOR_INTEGRATION_PKG_CFG_FILE}.in ${ADAPTOR_INTEGRATION_PKG_CFG_FILE} @ONLY )
+IF( NOT USE_VCPKG )
+  # Configure the pkg-config file
+  # Requires the following variables to be setup:
+  # @PREFIX@ @EXEC_PREFIX@ @DALI_ADAPTOR_VERSION@ @LIB_DIR@ @DEV_INCLUDE_PATH@
+  SET( DEV_INCLUDE_PATH ${INCLUDE_DIR} )
+  SET( ADAPTOR_PKG_CFG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/dali-adaptor.pc )
+  SET( ADAPTOR_INTEGRATION_PKG_CFG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/dali-adaptor-integration.pc )
+  CONFIGURE_FILE( ${ADAPTOR_PKG_CFG_FILE}.in ${ADAPTOR_PKG_CFG_FILE} @ONLY )
+  CONFIGURE_FILE( ${ADAPTOR_INTEGRATION_PKG_CFG_FILE}.in ${ADAPTOR_INTEGRATION_PKG_CFG_FILE} @ONLY )
+ENDIF()
+
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/system-cache-path.in ${ADAPTOR_ROOT}/dali/internal/adaptor/common/system-cache-path.cpp @ONLY)
+
+SET( THIRD_PARTY_WINDOWS_PLATFORM "" )
+IF( WIN32 )
+  SET( THIRD_PARTY_WINDOWS_PLATFORM ${ROOT_SRC_DIR}/third-party/windows-platform )
+ENDIF()
 
 INCLUDE_DIRECTORIES(
   ${ROOT_SRC_DIR}
   ${PROFILE_INCLUDE_DIRECTORIES}
+  ${THIRD_PARTY_WINDOWS_PLATFORM}
+  ${SYSTEM_INCLUDE_DIR}
+  #${CMAKE_CURRENT_SOURCE_DIR}/include
+  #${ROOT_SRC_DIR}/../windows-dependencies/include  ## VCC temporary add paths to windows dependencies
+  #${ROOT_SRC_DIR}/../dali-core.001/dali                ## VCC temporary add paths to dali-core
+  #${ROOT_SRC_DIR}/../dali-core.001                     ## VCC temporary add paths to dali-core
+  #${VCPKG_INSTALLED_INCLUDE}/include                       ## VCC temporary add paths to vcpkg
 )
 
 SET(LIBTYPE SHARED)
@@ -129,11 +166,16 @@ ENDIF()
 
 ADD_LIBRARY( ${name} ${LIBTYPE} ${SOURCES} )
 
-# pthread required due to gcc issue
-FIND_LIBRARY( PTHREAD pthread )
-IF( PTHREAD AND NOT ANDROID_PROFILE )
-  SET( OPTIONAL_LIBS ${OPTIONAL_LIBS} -lpthread )
+IF( UNIX )
+  # pthread required due to gcc issue
+  FIND_LIBRARY( PTHREAD pthread )
+  IF( PTHREAD AND NOT ANDROID_PROFILE )
+    SET( OPTIONAL_LIBS ${OPTIONAL_LIBS} -lpthread )
+  ENDIF()
 ENDIF()
+
+MESSAGE( "  DALI_FLAGS : [ " ${DALI_LDFLAGS} " ] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
 
 TARGET_LINK_LIBRARIES( ${name}
                        ${DALI_LDFLAGS}
@@ -150,11 +192,37 @@ SET_TARGET_PROPERTIES( ${name}
 )
 
 # Install the library so file and symlinks
-INSTALL( TARGETS ${name} DESTINATION ${LIB_DIR} )
+IF( USE_VCPKG )
+  MESSAGE( "LIB_DIR : [" ${LIB_DIR} "]" )
+  MESSAGE( "BIN_DIR : [" ${BIN_DIR} "]" )
+  INSTALL( TARGETS ${name}
+    EXPORT ${name}-targets
+    LIBRARY DESTINATION ${LIB_DIR}
+    ARCHIVE DESTINATION ${LIB_DIR}
+    RUNTIME DESTINATION ${BIN_DIR}
+  )
 
-# Install the pkg-config file
-INSTALL( FILES ${ADAPTOR_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
-INSTALL( FILES ${ADAPTOR_INTEGRATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
+  install(
+    EXPORT ${name}-targets
+    NAMESPACE ${name}::
+    FILE ${name}-targets.cmake
+    DESTINATION share/${name}
+  )
+
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake "
+    include(CMakeFindDependencyMacro)
+    include(\${CMAKE_CURRENT_LIST_DIR}/${name}-targets.cmake)
+  ")
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}-config.cmake DESTINATION share/${name})
+ELSE()
+  INSTALL( TARGETS ${name} DESTINATION ${LIB_DIR} )
+ENDIF()
+
+IF( NOT USE_VCPKG )
+  # Install the pkg-config file
+  INSTALL( FILES ${ADAPTOR_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
+  INSTALL( FILES ${ADAPTOR_INTEGRATION_PKG_CFG_FILE} DESTINATION ${LIB_DIR}/pkgconfig )
+ENDIF()
 
 # macro for installing headers by replacing prefix. (TODO, investigate
 # if there is a CMAKE way of doing this automatically)
@@ -291,17 +359,19 @@ IF( UNIX AND NOT ANDROID )
   ENDIF( LCOV_BIN )
 ENDIF( UNIX AND NOT ANDROID )
 
-# Linker Test
-SET( DALI_TEST_SUITE_DIR ${ROOT_SRC_DIR}/automated-tests/src/dali/dali-test-suite-utils )
-SET( LINKER_TEST_NAME ${DALI_ADAPTOR_PREFIX}linker-test )
-SET( LINKER_TEST_SOURCES
-  linker-test.cpp
-)
-ADD_EXECUTABLE( ${LINKER_TEST_NAME} ${LINKER_TEST_SOURCES} )
-MESSAGE(STATUS "libs: ${DALICORE_LDFLAGS}")
-TARGET_COMPILE_OPTIONS( ${LINKER_TEST_NAME} PRIVATE -I${ROOT_SRC_DIR} ${DALICORE_CFLAGS} )
-TARGET_LINK_LIBRARIES(${LINKER_TEST_NAME} ${name} ${DALICORE_LDFLAGS} ${VCONF_LDFLAGS} ${HARFBUZZ_LDFLAGS} )
-TARGET_INCLUDE_DIRECTORIES( ${LINKER_TEST_NAME} PRIVATE ${DALI_TEST_SUITE_DIR} )
+IF( NOT USE_VCPKG )
+  # Linker Test
+  SET( DALI_TEST_SUITE_DIR ${ROOT_SRC_DIR}/automated-tests/src/dali/dali-test-suite-utils )
+  SET( LINKER_TEST_NAME ${DALI_ADAPTOR_PREFIX}linker-test )
+  SET( LINKER_TEST_SOURCES
+    linker-test.cpp
+  )
+  ADD_EXECUTABLE( ${LINKER_TEST_NAME} ${LINKER_TEST_SOURCES} )
+  MESSAGE(STATUS "libs: ${DALICORE_LDFLAGS}")
+  TARGET_COMPILE_OPTIONS( ${LINKER_TEST_NAME} PRIVATE -I${ROOT_SRC_DIR} ${DALICORE_CFLAGS} )
+  TARGET_LINK_LIBRARIES(${LINKER_TEST_NAME} ${name} ${DALICORE_LDFLAGS} ${VCONF_LDFLAGS} ${HARFBUZZ_LDFLAGS} )
+  TARGET_INCLUDE_DIRECTORIES( ${LINKER_TEST_NAME} PRIVATE ${DALI_TEST_SUITE_DIR} )
+ENDIF()
 
 # Configuration Messages
 MESSAGE( STATUS "Configuration:\n" )
@@ -324,5 +394,9 @@ MESSAGE( STATUS "Compile flags:                    ${CMAKE_CXX_FLAGS}")
 IF( enable_feedback )
   ADD_SUBDIRECTORY( plugins )
 ENDIF()
+
+MESSAGE( "  VCPKG include folder : [" ${VCPKG_INSTALLED_INCLUDE} "]" )
+
+
 
 CLEAN_ARG_CACHE()

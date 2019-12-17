@@ -55,3 +55,6 @@ See the README.md in dali-adaptor/automated-tests.
 
          $ gbs build -A [TARGET_ARCH] --define "%enable_debug 1"
 
+
+## windows
+cmake -GNinja . -DUSE_VCPKG=1 -DPROFILE_LCASE=windows -DCMAKE_INSTALL_PREFIX=../../../dali-env -DVCPKG_INSTALLED_INCLUDE=c:\Users\v.cebollada\Workspace\Tools\VCPKG_TOOL.DALi\vcpkg\installed\x86-windows

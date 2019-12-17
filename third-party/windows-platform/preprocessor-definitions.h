@@ -1,6 +1,3 @@
-#ifndef DALI_INTERNAL_EGL_DEBUG_H
-#define DALI_INTERNAL_EGL_DEBUG_H
-
 /*
  * Copyright (c) 2019 Samsung Electronics Co., Ltd.
  *
@@ -18,29 +15,10 @@
  *
  */
 
-#include <dali/internal/graphics/common/egl-include.h>
-#include <EGL/eglext.h>
+#ifndef DALI_ADAPTOR_PREPROCESSOR_DEFINITIONS_H
+#define DALI_ADAPTOR_PREPROCESSOR_DEFINITIONS_H
 
-namespace Dali
-{
+#define WIN_CALLBACK_EVENT 9999
+#define LC_MESSAGES 0
 
-namespace Internal
-{
-
-namespace Adaptor
-{
-
-namespace Egl
-{
-
-void PrintError( EGLint error);
-
-}  // namespace Egl
-
-}  // namespace Adaptor
-
-}  // namespace Internal
-
-}  // namespace Dali
-
-#endif //DALI_INTERNAL_EGL_DEBUG_H
+#endif // DALI_ADAPTOR_PREPROCESSOR_DEFINITIONS_H

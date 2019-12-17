@@ -18,10 +18,11 @@
 // CLASS HEADER
 #include <dali/internal/graphics/gles/gl-extensions.h>
 
+#include <dali/internal/graphics/common/egl-include.h>
 // EXTERNAL INCLUDES
-#include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+// INTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 
 namespace Dali

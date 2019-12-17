@@ -23,7 +23,7 @@
 #include <pthread.h>
 #include <cstring>
 #include <curl/curl.h>
-#include <../ExInclude/InternalFileOperation.h>
+//#include <../ExInclude/InternalFileOperation.h>
 
 // INTERNAL INCLUDES
 #include <dali/internal/system/common/file-writer.h>
